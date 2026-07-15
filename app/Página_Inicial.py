@@ -321,7 +321,8 @@ li {
     line-height: 1.75;
 }
 
-.stButton > button {
+.stButton > button,
+.stLinkButton > a {
     width: 100%;
     min-height: 48px;
     border-radius: 11px;
@@ -330,7 +331,8 @@ li {
     transition: all 0.20s ease;
 }
 
-.stButton > button[kind="primary"] {
+.stButton > button[kind="primary"],
+.stLinkButton > a[kind="primary"] {
     color: var(--preto-juridico) !important;
     background: linear-gradient(
         135deg,
@@ -340,7 +342,8 @@ li {
     border: 1px solid var(--dourado-claro) !important;
 }
 
-.stButton > button[kind="primary"]:hover {
+.stButton > button[kind="primary"]:hover,
+.stLinkButton > a[kind="primary"]:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 24px rgba(201, 162, 39, 0.24);
 }
@@ -638,16 +641,13 @@ with c1:
         unsafe_allow_html=True,
     )
 
-    if st.button(
+    st.link_button(
         "Acessar Fiscus AI",
+        "http://localhost:8502/",
         type="primary",
-        use_container_width=True,
+        width="stretch",
         key="acessar_fiscus",
-    ):
-        st.info(
-            "A integração com a Fiscus AI será configurada "
-            "na próxima etapa."
-        )
+    )
 
 with c2:
     render_html(
