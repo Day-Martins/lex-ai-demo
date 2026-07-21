@@ -643,7 +643,7 @@ with c1:
 
     st.link_button(
         "Acessar Fiscus AI",
-        "http://localhost:8502/",
+        "https://fiscus.54-94-43-149.sslip.io/",
         type="primary",
         width="stretch",
         key="acessar_fiscus",
