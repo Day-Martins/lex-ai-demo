@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="lex-ai-demo/assets/lex_neutro.png" alt="Logo da LEX AI" width="150">
+  <img src="assets/lex_neutro.png" alt="Logotipo da LEX AI" width="150">
 
   # LEX AI
 
@@ -150,4 +150,3 @@ O projeto está em fase inicial. Para contribuir, crie uma branch específica, f
 ## Autoria
 
 Desenvolvido por **DMT Data Consulting**.
-
