@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/lex_neutro.png" alt="Logotipo da LEX AI" width="150">
+  <img src="assets/logo_lex.png" alt="Logotipo da LEX AI em fundo preto" width="420">
 
   # LEX AI
 
