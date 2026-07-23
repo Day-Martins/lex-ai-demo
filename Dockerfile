@@ -20,6 +20,9 @@ RUN python -m pip install --upgrade pip \
 
 COPY --chown=appuser:appuser . .
 
+RUN mkdir --parents /app/data \
+    && chown appuser:appuser /app/data
+
 USER appuser
 
 EXPOSE 8501
