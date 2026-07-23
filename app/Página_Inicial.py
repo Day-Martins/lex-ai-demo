@@ -4,6 +4,7 @@ from textwrap import dedent
 
 import streamlit as st
 
+from utils.access_forms import render_access_portal
 from utils.footer import render_footer
 
 
@@ -572,6 +573,33 @@ e segura.
 """,
     unsafe_allow_html=True,
 )
+
+
+# =========================================================
+# ACESSO E CADASTRO
+# =========================================================
+
+render_html(
+    """
+<div class="section-kicker">
+    Acesso seguro
+</div>
+
+<div class="section-title">
+    Entre ou solicite seu cadastro
+</div>
+
+<div class="section-description">
+    Novos cadastros utilizam apenas dados básicos e permanecem
+    pendentes até a aprovação do administrador.
+</div>
+""",
+    unsafe_allow_html=True,
+)
+
+access_left, access_center, access_right = st.columns([1, 2, 1])
+with access_center:
+    render_access_portal(compact=True)
 
 
 # =========================================================

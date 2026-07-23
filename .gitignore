@@ -5,3 +5,6 @@ __pycache__/
 *.py[cod]
 *.log
 *.db
+.pytest_cache/
+.streamlit/secrets.toml
+data/*.sqlite*
