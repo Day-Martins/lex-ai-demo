@@ -5,6 +5,7 @@ from datetime import datetime
 import pandas as pd
 import streamlit as st
 
+# Página administrativa da navegação principal.
 from database.models import UserStatus
 from services.access_control_service import (
     approve_user,

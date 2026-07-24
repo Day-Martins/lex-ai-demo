@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 import streamlit as st
 
+# Página de atualizações da navegação principal.
 from services.legislative_update_service import (
     REFERENCE_PORTALS,
     UpdateFetchResult,

@@ -4,7 +4,6 @@ from textwrap import dedent
 
 import streamlit as st
 
-from utils.access_forms import render_access_portal
 from utils.footer import render_footer
 
 
@@ -576,7 +575,7 @@ e segura.
 
 
 # =========================================================
-# ACESSO E CADASTRO
+# ACESSO
 # =========================================================
 
 render_html(
@@ -586,12 +585,11 @@ render_html(
 </div>
 
 <div class="section-title">
-    Entre ou solicite seu cadastro
+    Acesse a plataforma
 </div>
 
 <div class="section-description">
-    Novos cadastros utilizam apenas dados básicos e permanecem
-    pendentes até a aprovação do administrador.
+    Entrada e solicitação de cadastro estão reunidas em uma única página.
 </div>
 """,
     unsafe_allow_html=True,
@@ -599,7 +597,12 @@ render_html(
 
 access_left, access_center, access_right = st.columns([1, 2, 1])
 with access_center:
-    render_access_portal(compact=True)
+    st.page_link(
+        "pages/0_🔑_Acesso.py",
+        label="Entrar ou solicitar cadastro",
+        icon="🔑",
+        use_container_width=True,
+    )
 
 
 # =========================================================
