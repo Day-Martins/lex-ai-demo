@@ -61,7 +61,7 @@ def render_update_card(
             </span>
         """
 
-    st.markdown(
+    st.html(
         f"""
         <style>
             .lex-update-card {{
@@ -212,6 +212,5 @@ def render_update_card(
                 {fonte_html}
             </div>
         </article>
-        """,
-        unsafe_allow_html=True,
+        """
     )
