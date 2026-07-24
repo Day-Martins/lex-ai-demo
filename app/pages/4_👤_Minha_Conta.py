@@ -1,5 +1,6 @@
 import streamlit as st
 
+# Página de conta da navegação principal.
 from services.auth_service import AuthError, change_password
 from services.user_service import update_profile
 from utils.footer import render_footer
