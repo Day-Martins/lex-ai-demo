@@ -101,6 +101,9 @@ def _redirect_target(value: str | None) -> str:
 
 
 def _security_headers(response: Response) -> Response:
+    allowed_form_destinations = " ".join(
+        (_lex_public_url(), _fiscus_public_url())
+    )
     response.headers["Cache-Control"] = "no-store"
     response.headers["Pragma"] = "no-cache"
     response.headers["X-Content-Type-Options"] = "nosniff"
@@ -110,7 +113,7 @@ def _security_headers(response: Response) -> Response:
         "default-src 'self'; "
         "img-src 'self' data:; "
         "style-src 'self' 'unsafe-inline'; "
-        "form-action 'self'; "
+        f"form-action 'self' {allowed_form_destinations}; "
         "frame-ancestors 'none'; "
         "base-uri 'none'"
     )

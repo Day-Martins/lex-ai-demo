@@ -91,6 +91,16 @@ class AuthGatewayHttpTest(unittest.TestCase):
         self.assertNotIn("Uma conta.", response.text)
         self.assertNotIn("Duas plataformas.", response.text)
 
+    def test_login_csp_allows_redirects_to_both_platforms(self) -> None:
+        response = self.client.get("/login")
+
+        policy = response.headers["content-security-policy"]
+        self.assertIn(
+            "form-action 'self' https://lex.example.com "
+            "https://fiscus.example.com;",
+            policy,
+        )
+
     def _login(self) -> None:
         csrf_token = self._csrf()
         response = self.client.post(
