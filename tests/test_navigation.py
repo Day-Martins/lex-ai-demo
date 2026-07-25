@@ -16,6 +16,21 @@ class NavigationTest(unittest.TestCase):
         self.assertNotIn("render_access_portal", access_source)
         self.assertIn("require_user()", access_source)
         self.assertIn("logout_url()", access_source)
+        self.assertNotIn("Entrar ou solicitar cadastro", home_source)
+        self.assertNotIn("Acesse a plataforma", home_source)
+
+    def test_access_page_buttons_have_readable_variants(self) -> None:
+        access_source = (
+            PROJECT_ROOT / "app" / "pages" / "0_🔑_Acesso.py"
+        ).read_text()
+        style_source = (
+            PROJECT_ROOT / "app" / "utils" / "page_style.py"
+        ).read_text()
+
+        self.assertIn('type="primary"', access_source)
+        self.assertIn('type="secondary"', access_source)
+        self.assertIn('.stLinkButton > a[kind="primary"]', style_source)
+        self.assertIn(".stLinkButton > a *", style_source)
 
 
 if __name__ == "__main__":

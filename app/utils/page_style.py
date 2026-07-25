@@ -170,6 +170,31 @@ def apply_page_style() -> None:
             font-weight: 800;
         }
 
+        .stLinkButton > a {
+            color: var(--lex-white) !important;
+            background: rgba(255, 255, 255, 0.045) !important;
+            border: 1px solid rgba(201, 162, 39, 0.36) !important;
+        }
+
+        .stLinkButton > a * {
+            color: inherit !important;
+        }
+
+        .stLinkButton > a[kind="primary"] {
+            color: var(--lex-black) !important;
+            background: linear-gradient(
+                135deg,
+                var(--lex-gold-light),
+                var(--lex-gold)
+            ) !important;
+            border-color: var(--lex-gold-light) !important;
+        }
+
+        .stLinkButton > a:hover {
+            border-color: var(--lex-gold-light) !important;
+            filter: brightness(1.08);
+        }
+
         div[data-baseweb="input"] > div,
         div[data-baseweb="select"] > div,
         div[data-baseweb="textarea"] > div {

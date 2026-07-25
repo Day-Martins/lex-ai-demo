@@ -47,12 +47,14 @@ with center:
             "https://fiscus.54-94-43-149.sslip.io",
         ),
         icon="⚖️",
+        type="primary",
         use_container_width=True,
     )
     st.link_button(
         "Encerrar sessão nas duas plataformas",
         logout_url(),
         icon="↪️",
+        type="secondary",
         use_container_width=True,
     )
 

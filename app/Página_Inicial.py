@@ -575,37 +575,6 @@ e segura.
 
 
 # =========================================================
-# ACESSO
-# =========================================================
-
-render_html(
-    """
-<div class="section-kicker">
-    Acesso seguro
-</div>
-
-<div class="section-title">
-    Acesse a plataforma
-</div>
-
-<div class="section-description">
-    Entrada e solicitação de cadastro estão reunidas em uma única página.
-</div>
-""",
-    unsafe_allow_html=True,
-)
-
-access_left, access_center, access_right = st.columns([1, 2, 1])
-with access_center:
-    st.page_link(
-        "pages/0_🔑_Acesso.py",
-        label="Entrar ou solicitar cadastro",
-        icon="🔑",
-        use_container_width=True,
-    )
-
-
-# =========================================================
 # BADGES
 # =========================================================
 
