@@ -1,0 +1,57 @@
+{
+    servers {
+        protocols h1 h2
+    }
+}
+
+(security_headers) {
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "no-referrer"
+        Permissions-Policy "camera=(), microphone=(self), geolocation=()"
+        -Server
+    }
+}
+
+(authenticated_site) {
+    encode gzip
+
+    forward_auth auth:8000 {
+        uri /verify
+        copy_headers {
+            X-Auth-User-Id
+            X-Auth-Username
+            X-Auth-Name
+            X-Auth-Email
+            X-Auth-Admin
+        }
+    }
+
+    @streamlit_assets path /static/*
+    header @streamlit_assets {
+        >Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+        >Pragma "no-cache"
+        >Expires "0"
+    }
+
+    import security_headers
+    header Alt-Svc "clear"
+}
+
+{$AUTH_HOST} {
+    encode gzip
+    import security_headers
+    reverse_proxy auth:8000
+}
+
+{$FISCUS_HOST} {
+    import authenticated_site
+    reverse_proxy fiscus:8501
+}
+
+{$LEX_HOST} {
+    import authenticated_site
+    reverse_proxy lex:8501
+}

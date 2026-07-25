@@ -21,18 +21,29 @@ def email_is_configured() -> bool:
     )
 
 
-def _public_url() -> str:
+def _lex_public_url() -> str:
     return os.getenv(
         "LEX_PUBLIC_URL",
         "https://lex.54-94-43-149.sslip.io",
     ).rstrip("/")
 
 
+def _auth_public_url() -> str:
+    return os.getenv(
+        "AUTH_PUBLIC_URL",
+        f"{_lex_public_url()}/Acesso",
+    ).rstrip("/")
+
+
 def _access_url(**params: str) -> str:
-    base_url = f"{_public_url()}/Acesso"
+    base_url = f"{_auth_public_url()}/login"
     if not params:
         return base_url
     return f"{base_url}?{urlencode(params)}"
+
+
+def _reset_url(raw_token: str) -> str:
+    return f"{_auth_public_url()}/reset?{urlencode({'token': raw_token})}"
 
 
 def send_email(to_email: str, subject: str, html_body: str) -> DeliveryResult:
@@ -81,18 +92,18 @@ def send_approval_email(to_email: str, full_name: str) -> DeliveryResult:
     login_url = html.escape(_access_url(), quote=True)
     return send_email(
         to_email,
-        "Seu acesso à LEX AI foi aprovado",
+        "Seu acesso à LEX AI e à FISCUS AI foi aprovado",
         f"""
         <div style="font-family:Arial,sans-serif;color:#111827;line-height:1.6">
           <h2 style="color:#0B0F14">Acesso aprovado</h2>
           <p>Olá, {safe_name}.</p>
           <p>
-            Seu cadastro na LEX AI foi aprovado pelo administrador.
-            A senha definida no cadastro continua sendo a sua senha de acesso.
+            Seu cadastro integrado foi aprovado pelo administrador.
+            A senha definida no cadastro dá acesso à LEX AI e à FISCUS AI.
           </p>
           <p>
             <a href="{login_url}" style="color:#8A6D12;font-weight:700">
-              Entrar na LEX AI
+              Entrar nas plataformas
             </a>
           </p>
           <p style="font-size:13px;color:#6B7280">
@@ -129,7 +140,7 @@ def send_reset_email(
 ) -> DeliveryResult:
     safe_name = html.escape(full_name)
     reset_url = html.escape(
-        _access_url(reset_token=raw_token),
+        _reset_url(raw_token),
         quote=True,
     )
     return send_email(

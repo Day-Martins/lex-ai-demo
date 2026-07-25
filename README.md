@@ -24,6 +24,7 @@ O projeto utiliza uma identidade visual institucional em preto, azul-noturno e d
 
 - página inicial institucional;
 - acesso e solicitação de cadastro com aprovação administrativa;
+- login institucional com sessão única entre LEX AI e FISCUS AI;
 - senhas protegidas por hash `scrypt`;
 - área de conta para atualização de perfil e troca de senha;
 - bloqueio, reativação e redefinição de senha por link temporário;
@@ -37,7 +38,6 @@ O projeto utiliza uma identidade visual institucional em preto, azul-noturno e d
 
 - ambientes de IA separados por especialidade jurídica;
 - especialidades Trabalhista e Empresarial;
-- integração de autenticação única entre a LEX AI e cada especialidade;
 - ampliação das fontes de monitoramento legislativo e regulatório.
 
 ## Tecnologias
@@ -132,6 +132,10 @@ LEX_ADMIN_USERNAME=dmt
 LEX_ADMIN_EMAIL=administrador@exemplo.com
 LEX_ADMIN_INITIAL_PASSWORD=uma-senha-inicial-forte
 LEX_PUBLIC_URL=https://lex.54-94-43-149.sslip.io
+FISCUS_PUBLIC_URL=https://fiscus.54-94-43-149.sslip.io
+AUTH_PUBLIC_URL=https://acesso.54-94-43-149.sslip.io
+AUTH_COOKIE_DOMAIN=.54-94-43-149.sslip.io
+AUTH_SESSION_SECRET=um-segredo-aleatorio-com-no-minimo-32-caracteres
 SMTP_HOST=smtp.exemplo.com
 SMTP_PORT=587
 SMTP_USERNAME=usuario

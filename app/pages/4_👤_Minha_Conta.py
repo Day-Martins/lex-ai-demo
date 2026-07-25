@@ -5,7 +5,7 @@ from services.auth_service import AuthError, change_password
 from services.user_service import update_profile
 from utils.footer import render_footer
 from utils.page_style import apply_page_style, render_page_heading
-from utils.session import prepare_application, require_user, sign_out
+from utils.session import logout_url, prepare_application, require_user
 
 
 st.set_page_config(
@@ -95,8 +95,10 @@ with access_tab:
         "de redefinição, mas não consegue visualizar sua senha."
     )
     st.markdown("#### Encerrar sessão")
-    if st.button("Sair da LEX AI", type="secondary"):
-        sign_out()
-        st.rerun()
+    st.link_button(
+        "Sair da LEX AI e da FISCUS AI",
+        logout_url(),
+        type="secondary",
+    )
 
 render_footer()
