@@ -6,6 +6,7 @@ import unittest
 from datetime import datetime, timezone
 from pathlib import Path
 
+import bcrypt
 from starlette.testclient import TestClient
 
 os.environ["AUTH_COOKIE_DOMAIN"] = ".example.com"
@@ -15,6 +16,16 @@ os.environ["AUTH_SESSION_SECRET"] = (
 )
 os.environ["FISCUS_PUBLIC_URL"] = "https://fiscus.example.com"
 os.environ["LEX_PUBLIC_URL"] = "https://lex.example.com"
+os.environ["LEGACY_ADMIN_USERNAME"] = "dmt"
+os.environ["LEGACY_ADMIN_PASSWORD_HASH"] = bcrypt.hashpw(
+    b"SenhaDmtLegada123",
+    bcrypt.gensalt(rounds=4),
+).decode("utf-8")
+os.environ["LEGACY_CLIENT_USERNAME"] = "cliente-teste"
+os.environ["LEGACY_CLIENT_PASSWORD_HASH"] = bcrypt.hashpw(
+    b"SenhaClienteLegada123",
+    bcrypt.gensalt(rounds=4),
+).decode("utf-8")
 
 from auth_gateway.app import (  # noqa: E402
     CSRF_COOKIE,
@@ -28,7 +39,7 @@ from database.connection import (  # noqa: E402
     session_scope,
 )
 from database.models import User, UserStatus  # noqa: E402
-from services.auth_service import hash_password  # noqa: E402
+from services.auth_service import change_password, hash_password  # noqa: E402
 
 
 class AuthGatewayHttpTest(unittest.TestCase):
@@ -148,6 +159,98 @@ class AuthGatewayHttpTest(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("senha inválidos", response.text)
         self.assertIsNone(self.client.cookies.get(SESSION_COOKIE))
+
+    def test_existing_dmt_account_accepts_and_migrates_legacy_password(self) -> None:
+        with session_scope() as session:
+            session.add(
+                User(
+                    username="dmt",
+                    email="dmt@example.com",
+                    full_name="DMT Administrador",
+                    password_hash=hash_password("OutraSenhaAtual123"),
+                    status=UserStatus.APPROVED.value,
+                    is_admin=True,
+                )
+            )
+
+        csrf_token = self._csrf()
+        response = self.client.post(
+            "/login",
+            data={
+                "csrf_token": csrf_token,
+                "identifier": "dmt",
+                "password": "SenhaDmtLegada123",
+                "next": "https://lex.example.com",
+            },
+            follow_redirects=False,
+        )
+        self.assertEqual(response.status_code, 303)
+
+        with session_scope() as session:
+            user = session.query(User).filter_by(username="dmt").one()
+            self.assertTrue(user.password_hash.startswith("$2"))
+            self.assertTrue(user.is_admin)
+
+    def test_cliente_teste_is_created_from_legacy_access(self) -> None:
+        csrf_token = self._csrf()
+        response = self.client.post(
+            "/login",
+            data={
+                "csrf_token": csrf_token,
+                "identifier": "cliente-teste",
+                "password": "SenhaClienteLegada123",
+                "next": "https://fiscus.example.com",
+            },
+            follow_redirects=False,
+        )
+        self.assertEqual(response.status_code, 303)
+
+        with session_scope() as session:
+            user = session.query(User).filter_by(
+                username="cliente-teste"
+            ).one()
+            self.assertEqual(user.status, UserStatus.APPROVED.value)
+            self.assertFalse(user.is_admin)
+
+    def test_old_legacy_password_cannot_return_after_password_change(self) -> None:
+        csrf_token = self._csrf()
+        response = self.client.post(
+            "/login",
+            data={
+                "csrf_token": csrf_token,
+                "identifier": "cliente-teste",
+                "password": "SenhaClienteLegada123",
+                "next": "https://fiscus.example.com",
+            },
+            follow_redirects=False,
+        )
+        self.assertEqual(response.status_code, 303)
+
+        with session_scope() as session:
+            user = session.query(User).filter_by(
+                username="cliente-teste"
+            ).one()
+            user_id = user.id
+
+        change_password(
+            user_id,
+            "SenhaClienteLegada123",
+            "NovaSenhaCliente456",
+        )
+        self.client.get("/logout", follow_redirects=False)
+
+        csrf_token = self._csrf()
+        rejected = self.client.post(
+            "/login",
+            data={
+                "csrf_token": csrf_token,
+                "identifier": "cliente-teste",
+                "password": "SenhaClienteLegada123",
+                "next": "https://fiscus.example.com",
+            },
+        )
+        self.assertEqual(rejected.status_code, 200)
+        self.assertIn("senha inválidos", rejected.text)
 
     def test_blocked_account_loses_access_to_both_platforms(self) -> None:
         self._login()

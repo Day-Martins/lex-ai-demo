@@ -24,7 +24,7 @@ from auth_gateway.security import (
 from database.connection import init_database
 from database.models import User, UserStatus
 from services.access_control_service import reset_password_with_token
-from services.auth_service import AuthError, authenticate
+from services.auth_service import AuthError, authenticate, authenticate_legacy
 from services.user_service import (
     RegistrationData,
     bootstrap_admin_from_env,
@@ -486,6 +486,13 @@ async def login(request: Request) -> Response:
                     submitted_identifier,
                     form.get("password", ""),
                 )
+                if not result.ok:
+                    legacy_result = authenticate_legacy(
+                        submitted_identifier,
+                        form.get("password", ""),
+                    )
+                    if legacy_result is not None:
+                        result = legacy_result
                 if result.ok and result.user is not None:
                     _clear_login_failures(rate_key)
                     token = create_session_token(
