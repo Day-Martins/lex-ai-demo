@@ -6,6 +6,7 @@ from utils.page_style import (
     render_feature_card,
     render_page_heading,
 )
+from utils.tax_reform_icon import tax_reform_calculator_icon
 
 
 st.set_page_config(
@@ -80,7 +81,7 @@ features = (
         ),
     ),
     (
-        "🧮",
+        "",
         "Calculadora 2026–2033",
         (
             "Simula a transição tributária, compara cenários de CBS e IBS, "
@@ -125,7 +126,14 @@ for row_start in range(0, len(features), 3):
     columns = st.columns(3, gap="large")
     for column, feature in zip(columns, features[row_start : row_start + 3]):
         with column:
-            render_feature_card(*feature)
+            render_feature_card(
+                *feature,
+                icon_markup=(
+                    tax_reform_calculator_icon("lex-calculator-feature-icon")
+                    if feature[1] == "Calculadora 2026–2033"
+                    else None
+                ),
+            )
 
 st.markdown("## Como usar no dia a dia")
 step_1, step_2, step_3 = st.columns(3, gap="large")
