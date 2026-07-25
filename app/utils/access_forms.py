@@ -5,7 +5,12 @@ import streamlit as st
 from services.access_control_service import reset_password_with_token
 from services.auth_service import AuthError, authenticate
 from services.user_service import RegistrationData, register_user
-from utils.session import current_user, prepare_application, sign_in, sign_out
+from utils.session import (
+    current_user,
+    logout_url,
+    prepare_application,
+    sign_in,
+)
 
 
 def _render_reset_form(token: str) -> None:
@@ -145,9 +150,11 @@ def render_access_portal(*, compact: bool = False) -> None:
         with left:
             st.success(f"Você está conectado(a) como {user.full_name}.")
         with right:
-            if st.button("Sair", key=f"logout_{'compact' if compact else 'page'}"):
-                sign_out()
-                st.rerun()
+            st.link_button(
+                "Sair",
+                logout_url(),
+                use_container_width=True,
+            )
         return
 
     if compact:

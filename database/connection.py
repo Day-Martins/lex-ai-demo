@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator
 
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 from dotenv import load_dotenv
 
@@ -56,12 +56,22 @@ def get_engine() -> Engine:
         if database_path and database_path != ":memory:":
             Path(database_path).expanduser().parent.mkdir(parents=True, exist_ok=True)
         connect_args["check_same_thread"] = False
+        connect_args["timeout"] = 30
 
     _engine = create_engine(
         url,
         connect_args=connect_args,
         pool_pre_ping=True,
     )
+    if url.startswith("sqlite"):
+        @event.listens_for(_engine, "connect")
+        def _configure_sqlite(dbapi_connection, _connection_record) -> None:
+            cursor = dbapi_connection.cursor()
+            cursor.execute("PRAGMA foreign_keys=ON")
+            cursor.execute("PRAGMA busy_timeout=30000")
+            cursor.execute("PRAGMA journal_mode=WAL")
+            cursor.close()
+
     _session_factory = sessionmaker(
         bind=_engine,
         autoflush=False,

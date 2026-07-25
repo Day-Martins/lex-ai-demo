@@ -1,0 +1,161 @@
+name: dmt-ai
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      AUTH_HOST: ${AUTH_HOST:?Defina AUTH_HOST}
+      FISCUS_HOST: ${FISCUS_HOST:?Defina FISCUS_HOST}
+      LEX_HOST: ${LEX_HOST:?Defina LEX_HOST}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      auth:
+        condition: service_healthy
+      fiscus:
+        condition: service_healthy
+      lex:
+        condition: service_healthy
+    networks:
+      - frontend
+    security_opt:
+      - no-new-privileges:true
+
+  auth:
+    image: dmt/lex-ai:local
+    build:
+      context: ${LEX_BUILD_CONTEXT:-..}
+    restart: unless-stopped
+    init: true
+    command:
+      - uvicorn
+      - auth_gateway.app:app
+      - --host=0.0.0.0
+      - --port=8000
+      - --workers=1
+      - --no-server-header
+    environment: &lex_environment
+      AUTH_COOKIE_DOMAIN: ${AUTH_COOKIE_DOMAIN:?Defina AUTH_COOKIE_DOMAIN}
+      AUTH_PUBLIC_URL: https://${AUTH_HOST:?Defina AUTH_HOST}
+      AUTH_SESSION_LIFETIME_SECONDS: ${AUTH_SESSION_LIFETIME_SECONDS:-43200}
+      AUTH_SESSION_SECRET: ${AUTH_SESSION_SECRET:?Defina AUTH_SESSION_SECRET}
+      DATABASE_URL: sqlite:////app/data/lex_ai.db
+      FISCUS_PUBLIC_URL: https://${FISCUS_HOST:?Defina FISCUS_HOST}
+      LEX_ADMIN_EMAIL: ${LEX_ADMIN_EMAIL:-dmt@localhost.invalid}
+      LEX_ADMIN_INITIAL_PASSWORD: ${LEX_ADMIN_INITIAL_PASSWORD:-}
+      LEX_ADMIN_NAME: ${LEX_ADMIN_NAME:-DMT Administrador}
+      LEX_ADMIN_USERNAME: ${LEX_ADMIN_USERNAME:-dmt}
+      LEX_PUBLIC_URL: https://${LEX_HOST:?Defina LEX_HOST}
+      SMTP_FROM: ${SMTP_FROM:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_USE_SSL: ${SMTP_USE_SSL:-false}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
+      TZ: America/Sao_Paulo
+    expose:
+      - "8000"
+    volumes:
+      - lex_data:/app/data
+    networks:
+      - frontend
+    mem_limit: 256m
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "http://127.0.0.1:8000/health"]
+      interval: 20s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+
+  lex:
+    image: dmt/lex-ai:local
+    build:
+      context: ${LEX_BUILD_CONTEXT:-..}
+    restart: unless-stopped
+    init: true
+    environment: *lex_environment
+    expose:
+      - "8501"
+    volumes:
+      - lex_data:/app/data
+    networks:
+      - frontend
+    mem_limit: 400m
+    security_opt:
+      - no-new-privileges:true
+
+  fiscus:
+    image: dmt/fiscus-ai:local
+    build:
+      context: ${FISCUS_BUILD_CONTEXT:-../../fiscus-ai-demo}
+    restart: unless-stopped
+    init: true
+    environment:
+      AUTH_PUBLIC_URL: https://${AUTH_HOST:?Defina AUTH_HOST}
+      DOCUMENT_ANALYSIS_MAX_CHARS: ${DOCUMENT_ANALYSIS_MAX_CHARS:-120000}
+      FISCUS_PUBLIC_URL: https://${FISCUS_HOST:?Defina FISCUS_HOST}
+      FISCUS_DATABASE_PATH: /data/fiscus.db
+      INLABS_EMAIL: ${INLABS_EMAIL:-}
+      INLABS_PASSWORD: ${INLABS_PASSWORD:-}
+      LEGISLATION_UPDATE_INTERVAL_MINUTES: ${LEGISLATION_UPDATE_INTERVAL_MINUTES:-1440}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?Defina OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      OPENAI_MODEL_DOCUMENT_ANALYSIS: ${OPENAI_MODEL_DOCUMENT_ANALYSIS:-gpt-4.1-mini}
+      OPENAI_MODEL_PATRIMONIAL_DOSSIER: ${OPENAI_MODEL_PATRIMONIAL_DOSSIER:-gpt-4.1-mini}
+      PATRIMONIAL_DOSSIER_MAX_CHARS: ${PATRIMONIAL_DOSSIER_MAX_CHARS:-180000}
+      PYTHONFAULTHANDLER: "1"
+      TZ: America/Sao_Paulo
+    expose:
+      - "8501"
+    volumes:
+      - fiscus_data:/data
+      - fiscus_documents:/app/app/storage/documentos
+      - fiscus_legislation:/app/app/storage/legislation/raw
+    networks:
+      - frontend
+    mem_limit: 900m
+    security_opt:
+      - no-new-privileges:true
+
+  fiscus-scheduler:
+    image: dmt/fiscus-ai:local
+    restart: unless-stopped
+    init: true
+    command: ["python", "scripts/run_legislation_scheduler.py"]
+    healthcheck:
+      disable: true
+    environment:
+      FISCUS_DATABASE_PATH: /data/fiscus.db
+      INLABS_EMAIL: ${INLABS_EMAIL:-}
+      INLABS_PASSWORD: ${INLABS_PASSWORD:-}
+      LEGISLATION_UPDATE_INTERVAL_MINUTES: ${LEGISLATION_UPDATE_INTERVAL_MINUTES:-1440}
+      TZ: America/Sao_Paulo
+    volumes:
+      - fiscus_data:/data
+      - fiscus_legislation:/app/app/storage/legislation/raw
+    networks:
+      - frontend
+    mem_limit: 400m
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  frontend:
+    driver: bridge
+
+volumes:
+  caddy_config:
+  caddy_data:
+  fiscus_data:
+  fiscus_documents:
+  fiscus_legislation:
+  lex_data:
