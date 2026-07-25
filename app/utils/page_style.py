@@ -124,6 +124,78 @@ def apply_page_style() -> None:
             margin-bottom: 15px;
         }
 
+        .tax-reform-calculator-icon {
+            position: relative;
+            display: inline-block;
+            box-sizing: border-box;
+            overflow: hidden;
+            border: 2px solid #D8B45A;
+            border-radius: 22%;
+            background: linear-gradient(145deg, #17263A, #0D1521);
+            box-shadow:
+                inset 0 0 0 1px rgba(245, 247, 250, 0.05),
+                0 7px 16px rgba(0, 0, 0, 0.22);
+        }
+
+        .tax-icon-display {
+            position: absolute;
+            top: 12%;
+            left: 14%;
+            display: flex;
+            width: 72%;
+            height: 29%;
+            align-items: center;
+            justify-content: space-around;
+            box-sizing: border-box;
+            border: 1px solid rgba(201, 162, 39, 0.75);
+            border-radius: 24%;
+            background: #17263A;
+            color: #F5F7FA;
+            font-family: Arial, sans-serif;
+            font-size: 31%;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .tax-icon-display div:last-child {
+            color: #D8B45A;
+        }
+
+        .tax-icon-key {
+            position: absolute;
+            left: 16%;
+            width: 13%;
+            height: 13%;
+            border-radius: 35%;
+            background: #334155;
+            box-shadow: inset 0 0 0 1px rgba(245, 247, 250, 0.06);
+        }
+
+        .tax-icon-key-one { bottom: 29%; }
+        .tax-icon-key-two { bottom: 12%; }
+        .tax-icon-key-three { bottom: 29%; left: 34%; }
+        .tax-icon-key-four { bottom: 12%; left: 34%; }
+
+        .tax-icon-trend {
+            position: absolute;
+            right: 8%;
+            bottom: 10%;
+            color: #D8B45A;
+            font-family: Arial, sans-serif;
+            font-size: 48%;
+            font-weight: 900;
+            line-height: 1;
+            text-shadow: 0 3px 8px rgba(201, 162, 39, 0.22);
+        }
+
+        .lex-feature-icon .tax-reform-calculator-icon {
+            display: block;
+            width: 44px;
+            height: 44px;
+            font-size: 28px;
+            filter: drop-shadow(0 6px 14px rgba(201, 162, 39, 0.16));
+        }
+
         .lex-feature-title {
             color: var(--lex-white);
             font-size: 18px;
@@ -231,11 +303,18 @@ def render_page_heading(kicker: str, title: str, description: str) -> None:
     )
 
 
-def render_feature_card(icon: str, title: str, text: str) -> None:
+def render_feature_card(
+    icon: str,
+    title: str,
+    text: str,
+    *,
+    icon_markup: str | None = None,
+) -> None:
+    rendered_icon = icon_markup if icon_markup is not None else escape(icon)
     st.html(
         f"""
         <div class="lex-feature-card">
-            <div class="lex-feature-icon">{escape(icon)}</div>
+            <div class="lex-feature-icon">{rendered_icon}</div>
             <div class="lex-feature-title">{escape(title)}</div>
             <div class="lex-feature-text">{escape(text)}</div>
         </div>
