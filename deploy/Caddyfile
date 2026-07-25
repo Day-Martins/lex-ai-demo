@@ -20,6 +20,10 @@
 
     forward_auth auth:8000 {
         uri /verify
+        # A verificação é sempre HTTP. Não encaminhe o upgrade WebSocket
+        # recebido do Streamlit para o gateway de autenticação.
+        header_up -Connection
+        header_up -Upgrade
         copy_headers {
             X-Auth-User-Id
             X-Auth-Username
